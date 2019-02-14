@@ -1,0 +1,162 @@
+---
+title: "An R package for SPRE"
+author: ""
+output: rmarkdown::github_document
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette, we show two examples of SPRE analysis. The first example can be found in Weissman-Miller, D., Miller, R. J., & Shotwell, M. P. (2017), while the second example can be found in Weissman-Miller, D. (2013). The references are given as follow.
+
+Weissman-Miller, D. (2013). Novel point estimation from a Semiparametric Ratio Estimator (SPRE): Long-term health outcomes from short-term linear data, with application to weight loss in obesity. International Journal of Biostatistics, 9(2): 175-184 DOI: http://dx.doi.org/10.1515/ijb-2012-0049.
+
+Weissman-Miller, D., Miller, R. J., & Shotwell, M. P. (2017). Translational Research for Occupational Therapy: Using SPRE in Hippotherapy for Children with Developmental Disabilities. Occupational therapy international, 2017.
+
+## First example
+
+### Load package
+
+```{r}
+library(SPRE)
+```
+
+### Load HEAT data
+
+```{r}
+data("HEAT_stat")
+```
+
+### Step 1: Determining the most significant F statistic by stepwise regression
+
+```{r}
+skip_indices<-1:2
+step_reg<-stepwise_regression(HEAT_stat$Session,HEAT_stat$FData,skip_indices)
+```
+
+### Step 2: Evaluating the change point and estimating parameter
+
+Here, the change point is identified as the 11th index.
+
+```{r}
+SPRE_mod<-SPRE(step_reg,chptidx=11,lastidx=14)
+```
+
+### Step 3: Estimating/predicting long-term outcomes
+
+We will need to supply the following things to the function:
+
+- Times/sessions the predictions will be evaluated at: xpred
+
+- Shape parameter: kshape
+
+- Change point: tau
+
+- Prior response: theta1
+
+```{r}
+kshape<-SPRE_mod$kshape
+idxmaxFstat<-which.max(SPRE_mod$step_reg$fDist[,"Fstat"])
+tau<-SPRE_mod$step_reg$fDist[idxmaxFstat,"x"]
+theta1<-HEAT_stat$FData[SPRE_mod$chptidx]
+xpred<-7:46
+SPRE_pred<-predict_SPRE(xpred=xpred,kshape=kshape,tau=tau,
+                        theta1=theta1,predtype="rolling")
+```
+
+### Additional analyses and checks
+
+#### Residuals plot
+
+```{r,fig.width=7,fig.height=7}
+plot_residuals(SPRE_mod)
+```
+
+#### Plot probability distribution
+```{r,fig.width=7,fig.height=7}
+plot_probability(SPRE_mod,SPRE_pred,xmin=2)
+```
+
+#### Plot things to check weibull distribution
+```{r,fig.width=7,fig.height=7}
+plot_weibull(SPRE_mod,SPRE_pred)
+```
+
+#### Check prediction stability
+```{r,fig.width=7,fig.height=7}
+prediction_stability(SPRE_pred)
+```
+
+## Second example
+
+### Load package
+
+```{r}
+library(SPRE)
+```
+
+### Input data
+
+```{r}
+x<-c(0,0.25,0.5,1.0,1.5,1.75,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,9.0,10.0)
+y<-c(0,0.5,1.0,2.5,3.5,4.5,6.0,6.5,7.5,8.0,9.0,9.5,
+     10.0,10.5,11.0,10.8,10.75,10.6,10.5,10.4,10.25)
+skip_indices<-c(1:6,12,14,16,18,20)
+```
+
+### Step 1: Determining the most significant F statistic by stepwise regression
+
+```{r}
+step_reg<-stepwise_regression(x,y,skip_indices)
+```
+
+### Step 2: Evaluating the change point and estimating parameter
+
+The change point is identified as the 11th index.
+
+```{r}
+SPRE_mod<-SPRE(step_reg,chptidx=11)
+```
+
+### Step 3: Estimating/predicting long-term outcomes
+
+```{r}
+kshape<-SPRE_mod$kshape
+idxmaxFstat<-which.max(SPRE_mod$step_reg$fDist[,"Fstat"])
+tau<-SPRE_mod$step_reg$fDist[idxmaxFstat,"x"]
+theta1<-y[SPRE_mod$chptidx]
+xpred<-c(4,4.5,5,5.5,6,7,8,9,10)
+SPRE_pred<-predict_SPRE(xpred=xpred,
+                        kshape=kshape,tau=tau,theta1=theta1)
+```
+
+### Additional analyses and checks
+
+#### Residuals plot
+
+```{r,fig.width=7,fig.height=7}
+plot_residuals(SPRE_mod)
+```
+
+#### Plot probability distribution
+```{r,fig.width=7,fig.height=7}
+plot_probability(SPRE_mod,SPRE_pred,xmin=2)
+```
+
+#### Plot things to check weibull distribution
+```{r,fig.width=7,fig.height=7}
+plot_weibull(SPRE_mod,SPRE_pred)
+```
+
+#### Check prediction stability
+```{r,fig.width=7,fig.height=7}
+prediction_stability(SPRE_pred,npred=length(xpred))
+```
