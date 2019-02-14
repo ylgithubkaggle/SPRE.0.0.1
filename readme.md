@@ -37,7 +37,7 @@ The whole process can be done in R. First check the availability of "devtools":
 
 After installing devtools, the SPRE package can be installed simply by running:
 
-    install_github("ylgithubkaggle/SPRE0.0.1")
+    install_github("ylgithubkaggle/SPRE.0.0.1")
 
 Finally, everytime we need to use the package, we can load the package by running:
 
