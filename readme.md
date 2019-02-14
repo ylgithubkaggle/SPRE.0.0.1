@@ -50,7 +50,7 @@ Please refer to the vignette for a tutorial on how to perform SPRE analysis in R
 
     vignette("SPRE")
 
-There are two examples illustrating the use of SPRE package. The vignette can also be found here: [SPRE vignette](https://github.com/SPRE.0.0.1/vignettes_github/SPRE.md)
+There are two examples illustrating the use of SPRE package. The vignette can also be found here: [SPRE vignette](https://github.com/ylgithubkaggle/SPRE.0.0.1/blob/master/vignettes_github/SPRE.md)
 
 Besides the vignette, a help file can be loaded by running:
 
